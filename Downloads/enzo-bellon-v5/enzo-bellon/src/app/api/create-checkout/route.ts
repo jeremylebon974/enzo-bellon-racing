@@ -1,40 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
+import { createClient } from '@supabase/supabase-js'
 
 export async function POST(req: NextRequest) {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: '2026-04-22.dahlia',
+  })
+
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+
+  const body = await req.text()
+  const sig = req.headers.get('stripe-signature')!
+
+  let event: Stripe.Event
+
   try {
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-      apiVersion: '2026-04-22.dahlia',
-    })
+    event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!)
+  } catch (err: any) {
+    return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 })
+  }
 
-    const { items } = await req.json()
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object as any
 
-    const line_items = items.map((item: any) => ({
-      price_data: {
-        currency: 'eur',
-        product_data: {
-          name: item.name,
-          images: item.image ? [item.image] : [],
-          description: item.size ? `Taille: ${item.size}` : undefined,
-        },
-        unit_amount: Math.round(item.price * 100),
-      },
+    const lineItems = await stripe.checkout.sessions.listLineItems(session.id)
+
+    const produits = lineItems.data.map((item: any) => ({
+      name: item.description,
       quantity: item.quantity,
+      price: (item.amount_total || 0) / 100,
     }))
 
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items,
-      mode: 'payment',
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001'}/panier?success=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001'}/panier?canceled=true`,
-      shipping_address_collection: {
-        allowed_countries: ['FR', 'BE', 'CH', 'LU', 'MC', 'RE', 'GP', 'MQ', 'GF'],
-      },
-    })
-
-    return NextResponse.json({ url: session.url })
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    await supabase.from('commandes').insert([{
+      client_prenom: session.shipping_details?.name?.split(' ')[0] || 'Client',
+      client_email: session.customer_details?.email || '',
+      client_adresse: session.shipping_details?.address
+        ? `${session.shipping_details.address.line1}, ${session.shipping_details.address.city}, ${session.shipping_details.address.country}`
+        : '',
+      produits,
+      total: (session.amount_total || 0) / 100,
+      statut: 'en_attente',
+    }])
   }
+
+  return NextResponse.json({ received: true })
 }
