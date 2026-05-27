@@ -1,5 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { useCart } from '@/context/CartContext'
 
 const navLinks = [
   { href: '#boutique', label: 'Boutique' },
@@ -33,6 +35,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [social, setSocial] = useState({ instagram: 0, facebook: 0 })
+  const { count, setIsOpen } = useCart()
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60)
@@ -56,8 +59,6 @@ export default function Navbar() {
         borderBottom: scrolled ? '1px solid rgba(255,90,0,0.1)' : 'none',
       }}>
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-16">
-
-        {/* Logo */}
         <a href="#" className="flex items-center gap-3">
           <div className="w-8 h-8 flex items-center justify-center"
             style={{ background: 'linear-gradient(135deg, #FF3300, #FF5A00)', clipPath: 'polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%)' }}>
@@ -69,7 +70,6 @@ export default function Navbar() {
           </div>
         </a>
 
-        {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-8">
           {navLinks.map(link => (
             <a key={link.href} href={link.href}
@@ -82,7 +82,6 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* Right — social + CTA */}
         <div className="hidden md:flex items-center gap-3">
           <a href="https://www.instagram.com/33fastyfoxy/" target="_blank" rel="noopener noreferrer"
             className="flex items-center gap-2 px-3 py-1.5 transition-all duration-200"
@@ -90,9 +89,7 @@ export default function Navbar() {
             onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(253,29,29,0.4)'}
             onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'}>
             <IgIcon />
-            <span className="font-condensed text-xs font-bold" style={{ color: 'rgba(245,245,245,0.8)' }}>
-              {formatNumber(social.instagram)}
-            </span>
+            <span className="font-condensed text-xs font-bold" style={{ color: 'rgba(245,245,245,0.8)' }}>{formatNumber(social.instagram)}</span>
           </a>
           <a href="https://www.facebook.com/33fastyfoxy" target="_blank" rel="noopener noreferrer"
             className="flex items-center gap-2 px-3 py-1.5 transition-all duration-200"
@@ -100,25 +97,48 @@ export default function Navbar() {
             onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(24,119,242,0.4)'}
             onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'}>
             <FbIcon />
-            <span className="font-condensed text-xs font-bold" style={{ color: 'rgba(245,245,245,0.8)' }}>
-              {formatNumber(social.facebook)}
-            </span>
+            <span className="font-condensed text-xs font-bold" style={{ color: 'rgba(245,245,245,0.8)' }}>{formatNumber(social.facebook)}</span>
           </a>
+
+          <button onClick={() => setIsOpen(true)}
+            className="relative flex items-center gap-2 px-3 py-1.5 transition-all duration-200"
+            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer' }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(255,90,0,0.4)'}
+            onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(245,245,245,0.8)" strokeWidth="2">
+              <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
+            </svg>
+            {count > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 flex items-center justify-center text-xs font-bold rounded-full"
+                style={{ background: 'var(--orange)', color: 'white', fontSize: '10px' }}>
+                {count}
+              </span>
+            )}
+          </button>
+
           <a href="#boutique" className="btn-primary text-xs py-2 px-5">Boutique</a>
         </div>
 
-        {/* Mobile burger */}
-        <button className="md:hidden flex flex-col gap-1.5 p-2" onClick={() => setMenuOpen(!menuOpen)} aria-label="Menu">
-          <span className="block w-6 h-0.5 transition-all duration-200"
-            style={{ background: 'var(--white)', transform: menuOpen ? 'rotate(45deg) translate(4px, 4px)' : 'none' }} />
-          <span className="block w-6 h-0.5 transition-all duration-200"
-            style={{ background: 'var(--white)', opacity: menuOpen ? 0 : 1 }} />
-          <span className="block w-6 h-0.5 transition-all duration-200"
-            style={{ background: 'var(--white)', transform: menuOpen ? 'rotate(-45deg) translate(4px, -4px)' : 'none' }} />
-        </button>
+        <div className="md:hidden flex items-center gap-3">
+          <button onClick={() => setIsOpen(true)} className="relative p-2" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+              <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
+            </svg>
+            {count > 0 && (
+              <span className="absolute top-0 right-0 w-4 h-4 flex items-center justify-center text-xs font-bold rounded-full"
+                style={{ background: 'var(--orange)', color: 'white', fontSize: '10px' }}>
+                {count}
+              </span>
+            )}
+          </button>
+          <button className="flex flex-col gap-1.5 p-2" onClick={() => setMenuOpen(!menuOpen)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+            <span className="block w-6 h-0.5" style={{ background: 'var(--white)', transform: menuOpen ? 'rotate(45deg) translate(4px, 4px)' : 'none', transition: 'all 0.2s' }} />
+            <span className="block w-6 h-0.5" style={{ background: 'var(--white)', opacity: menuOpen ? 0 : 1, transition: 'all 0.2s' }} />
+            <span className="block w-6 h-0.5" style={{ background: 'var(--white)', transform: menuOpen ? 'rotate(-45deg) translate(4px, -4px)' : 'none', transition: 'all 0.2s' }} />
+          </button>
+        </div>
       </div>
 
-      {/* Mobile menu */}
       {menuOpen && (
         <div className="md:hidden px-6 pb-6 pt-2 flex flex-col gap-4"
           style={{ background: 'rgba(10,10,10,0.98)', borderTop: '1px solid rgba(255,90,0,0.1)' }}>
@@ -129,20 +149,11 @@ export default function Navbar() {
               {link.label}
             </a>
           ))}
-          <div className="flex gap-3 mt-2">
-            <a href="https://www.instagram.com/33fastyfoxy/" target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-2 px-3 py-1.5"
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <IgIcon />
-              <span className="font-condensed text-xs font-bold" style={{ color: 'rgba(245,245,245,0.8)' }}>{formatNumber(social.instagram)}</span>
-            </a>
-            <a href="https://www.facebook.com/33fastyfoxy" target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-2 px-3 py-1.5"
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <FbIcon />
-              <span className="font-condensed text-xs font-bold" style={{ color: 'rgba(245,245,245,0.8)' }}>{formatNumber(social.facebook)}</span>
-            </a>
-          </div>
+          <Link href="/panier" onClick={() => setMenuOpen(false)}
+            className="font-condensed text-base tracking-widest uppercase"
+            style={{ color: 'rgba(245,245,245,0.8)', letterSpacing: '0.15em' }}>
+            Panier {count > 0 && `(${count})`}
+          </Link>
           <a href="#boutique" onClick={() => setMenuOpen(false)} className="btn-primary text-xs py-2 px-5 self-start mt-2">Boutique</a>
         </div>
       )}

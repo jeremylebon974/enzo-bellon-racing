@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { CartProvider } from '@/context/CartContext'
+import MiniCart from '@/components/MiniCart'
 
 export const metadata: Metadata = {
   title: 'Enzo Bellon — FIM JuniorGP Moto3 World Championship | N°33 Fasty Foxy',
@@ -9,7 +11,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr">
-      <body>{children}</body>
+      <body>
+        <CartProvider>
+          {children}
+          <MiniCart />
+        </CartProvider>
+      </body>
     </html>
   )
 }

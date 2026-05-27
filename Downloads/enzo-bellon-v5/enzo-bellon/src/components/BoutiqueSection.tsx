@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
+import { useCart } from '@/context/CartContext'
 
 type Product = {
   id: string
@@ -11,6 +12,7 @@ type Product = {
   price: number
   image: string
   active: boolean
+  sizes: string[]
 }
 
 const categoryLabels: Record<string, string> = {
@@ -29,8 +31,31 @@ const categoryFilters = [
 ]
 
 function ProductCard({ product }: { product: Product }) {
-  const [added, setAdded] = useState(false)
+  const { addItem } = useCart()
   const [hovered, setHovered] = useState(false)
+  const [selectedSize, setSelectedSize] = useState('')
+  const [added, setAdded] = useState(false)
+  const [error, setError] = useState(false)
+
+  const hasSizes = product.sizes && product.sizes.length > 0
+
+  const handleAdd = () => {
+    if (hasSizes && !selectedSize) {
+      setError(true)
+      setTimeout(() => setError(false), 2000)
+      return
+    }
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      category: product.category,
+      size: selectedSize,
+    })
+    setAdded(true)
+    setTimeout(() => setAdded(false), 1500)
+  }
 
   return (
     <div
@@ -53,14 +78,8 @@ function ProductCard({ product }: { product: Product }) {
         ) : (
           <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.1)', fontSize: '48px' }}>🏷️</div>
         )}
-        <div className="absolute inset-0 flex items-end justify-center pb-4 transition-opacity duration-300"
-          style={{ opacity: hovered ? 1 : 0, background: 'linear-gradient(to top,rgba(10,10,10,0.65) 0%,transparent 60%)' }}>
-          <span className="font-bold text-xs tracking-widest uppercase px-5 py-2"
-            style={{ fontFamily: 'var(--font-condensed)', background: 'rgba(10,10,10,0.85)', border: '1px solid rgba(255,90,0,0.4)', color: 'var(--white)', letterSpacing: '0.15em' }}>
-            Voir le produit
-          </span>
-        </div>
       </div>
+
       <div className="p-5 flex flex-col flex-1">
         <div className="font-bold text-xs tracking-widest uppercase mb-1"
           style={{ fontFamily: 'var(--font-condensed)', color: 'var(--orange)', letterSpacing: '0.2em' }}>
@@ -70,26 +89,49 @@ function ProductCard({ product }: { product: Product }) {
           style={{ fontFamily: 'var(--font-condensed)', color: 'var(--white)' }}>
           {product.name}
         </h3>
-        <p className="text-xs leading-relaxed flex-1 mb-4" style={{ color: 'rgba(245,245,245,0.4)' }}>
+        <p className="text-xs leading-relaxed mb-3" style={{ color: 'rgba(245,245,245,0.4)' }}>
           {product.description}
         </p>
+
+        {hasSizes && (
+          <div className="mb-4">
+            <div className="text-xs mb-2" style={{ color: 'rgba(245,245,245,0.4)', fontFamily: 'var(--font-condensed)', letterSpacing: '0.1em' }}>
+              TAILLE {error && <span style={{ color: 'var(--orange)' }}>— Choisir une taille</span>}
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {product.sizes.map(size => (
+                <button key={size} onClick={() => setSelectedSize(size)}
+                  className="text-xs font-bold px-2.5 py-1 transition-all duration-150"
+                  style={{
+                    fontFamily: 'var(--font-condensed)',
+                    background: selectedSize === size ? 'linear-gradient(135deg,#FF3300,#FF5A00)' : 'rgba(255,255,255,0.05)',
+                    color: selectedSize === size ? 'white' : 'rgba(245,245,245,0.6)',
+                    border: selectedSize === size ? 'none' : '1px solid rgba(255,255,255,0.1)',
+                    cursor: 'pointer',
+                  }}>
+                  {size}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center justify-between mt-auto">
           <span className="font-display text-2xl" style={{ color: 'var(--white)' }}>
             {Number(product.price).toFixed(2).replace('.', ',')} €
           </span>
-          <button
-            onClick={() => { setAdded(true); setTimeout(() => setAdded(false), 1500) }}
+          <button onClick={handleAdd}
             className="font-bold text-xs tracking-widest uppercase px-4 py-2 transition-all duration-200"
             style={{
               fontFamily: 'var(--font-condensed)',
-              background: added ? 'rgba(255,90,0,0.12)' : 'linear-gradient(135deg,#FF3300,#FF5A00)',
-              color: added ? 'var(--orange)' : '#fff',
-              border: added ? '1px solid rgba(255,90,0,0.4)' : 'none',
+              background: added ? 'rgba(0,200,100,0.15)' : error ? 'rgba(255,90,0,0.15)' : 'linear-gradient(135deg,#FF3300,#FF5A00)',
+              color: added ? '#00c864' : error ? 'var(--orange)' : '#fff',
+              border: (added || error) ? `1px solid ${added ? 'rgba(0,200,100,0.4)' : 'rgba(255,90,0,0.4)'}` : 'none',
               clipPath: 'polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%)',
               letterSpacing: '0.1em',
               cursor: 'pointer',
             }}>
-            {added ? '✓ Ajouté' : 'Ajouter'}
+            {added ? '✓ Ajouté' : error ? 'Taille ?' : 'Ajouter'}
           </button>
         </div>
       </div>
@@ -104,11 +146,7 @@ export default function BoutiqueSection() {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const { data } = await supabase
-        .from('produits')
-        .select('*')
-        .eq('active', true)
-        .order('created_at', { ascending: false })
+      const { data } = await supabase.from('produits').select('*').eq('active', true).order('created_at', { ascending: false })
       setProducts(data || [])
       setLoading(false)
     }
@@ -134,7 +172,6 @@ export default function BoutiqueSection() {
             </div>
           </div>
 
-          {/* Filtres */}
           <div className="flex flex-wrap gap-2 mb-10">
             {categoryFilters.map(cat => {
               const active = activeCategory === cat.id
@@ -156,7 +193,6 @@ export default function BoutiqueSection() {
             })}
           </div>
 
-          {/* Grille */}
           {loading ? (
             <div style={{ textAlign: 'center', padding: '60px', color: 'rgba(255,255,255,0.3)' }}>Chargement...</div>
           ) : filtered.length === 0 ? (
@@ -169,7 +205,6 @@ export default function BoutiqueSection() {
             </div>
           )}
 
-          {/* Garanties */}
           <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-px" style={{ background: 'rgba(255,90,0,0.06)' }}>
             {[
               { icon: '📦', title: 'Livraison mondiale', desc: 'Expédition internationale disponible' },
