@@ -4,10 +4,10 @@ import Link from 'next/link'
 import { useCart } from '@/context/CartContext'
 
 const navLinks = [
-  { href: '#boutique', label: 'Boutique' },
-  { href: '#galerie', label: 'Galerie' },
-  { href: '#saison', label: 'Saison' },
-  { href: '#partenaires', label: 'Partenaires' },
+  { href: '/#boutique', label: 'Boutique' },
+  { href: '/#galerie', label: 'Galerie' },
+  { href: '/#saison', label: 'Saison' },
+  { href: '/#partenaires', label: 'Partenaires' },
 ]
 
 const IgIcon = () => (
@@ -59,7 +59,7 @@ export default function Navbar() {
         borderBottom: scrolled ? '1px solid rgba(255,90,0,0.1)' : 'none',
       }}>
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-16">
-        <a href="#" className="flex items-center gap-3">
+        <Link href="/" className="flex items-center gap-3">
           <div className="w-8 h-8 flex items-center justify-center"
             style={{ background: 'linear-gradient(135deg, #FF3300, #FF5A00)', clipPath: 'polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%)' }}>
             <span className="font-display text-white text-sm">33</span>
@@ -68,17 +68,17 @@ export default function Navbar() {
             <div className="font-display text-white text-lg leading-none tracking-wider">ENZO BELLON</div>
             <div className="font-condensed text-xs tracking-widest uppercase leading-none" style={{ color: 'var(--orange)', letterSpacing: '0.2em' }}>Fasty Foxy</div>
           </div>
-        </a>
+        </Link>
 
         <div className="hidden md:flex items-center gap-8">
           {navLinks.map(link => (
-            <a key={link.href} href={link.href}
+            <Link key={link.href} href={link.href}
               className="font-condensed text-sm tracking-widest uppercase transition-colors duration-200"
               style={{ color: 'rgba(245,245,245,0.65)', letterSpacing: '0.15em' }}
               onMouseEnter={e => e.currentTarget.style.color = 'var(--orange)'}
               onMouseLeave={e => e.currentTarget.style.color = 'rgba(245,245,245,0.65)'}>
               {link.label}
-            </a>
+            </Link>
           ))}
         </div>
 
@@ -116,7 +116,7 @@ export default function Navbar() {
             )}
           </button>
 
-          <a href="#boutique" className="btn-primary text-xs py-2 px-5">Boutique</a>
+          <Link href="/#boutique" className="btn-primary text-xs py-2 px-5">Boutique</Link>
         </div>
 
         <div className="md:hidden flex items-center gap-3">
@@ -143,18 +143,18 @@ export default function Navbar() {
         <div className="md:hidden px-6 pb-6 pt-2 flex flex-col gap-4"
           style={{ background: 'rgba(10,10,10,0.98)', borderTop: '1px solid rgba(255,90,0,0.1)' }}>
           {navLinks.map(link => (
-            <a key={link.href} href={link.href} onClick={() => setMenuOpen(false)}
+            <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)}
               className="font-condensed text-base tracking-widest uppercase"
               style={{ color: 'rgba(245,245,245,0.8)', letterSpacing: '0.15em' }}>
               {link.label}
-            </a>
+            </Link>
           ))}
           <Link href="/panier" onClick={() => setMenuOpen(false)}
             className="font-condensed text-base tracking-widest uppercase"
             style={{ color: 'rgba(245,245,245,0.8)', letterSpacing: '0.15em' }}>
             Panier {count > 0 && `(${count})`}
           </Link>
-          <a href="#boutique" onClick={() => setMenuOpen(false)} className="btn-primary text-xs py-2 px-5 self-start mt-2">Boutique</a>
+          <Link href="/#boutique" onClick={() => setMenuOpen(false)} className="btn-primary text-xs py-2 px-5 self-start mt-2">Boutique</Link>
         </div>
       )}
     </nav>
