@@ -364,44 +364,76 @@ export default function AdminDashboard() {
           )}
 
           {/* ═══ COMMANDES ═══ */}
-          {tab === 'commandes' && (
+{tab === 'commandes' && (
+  <div>
+    <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+      <input type="text" placeholder="Rechercher une commande..." value={search} onChange={e => setSearch(e.target.value)}
+        style={{ flex: 1, padding: '10px 16px', background: '#141414', border: '1px solid rgba(255,255,255,0.08)', color: 'white', fontSize: '14px', outline: 'none' }} />
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      {filteredCommandes.length === 0 ? (
+        <div style={{ padding: '32px', textAlign: 'center', color: 'rgba(255,255,255,0.3)', background: '#141414', border: '1px solid rgba(255,90,0,0.08)' }}>Aucune commande</div>
+      ) : filteredCommandes.map((c: any) => (
+        <div key={c.id} style={{ background: '#141414', border: '1px solid rgba(255,90,0,0.08)', padding: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
             <div>
-              <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
-                <input type="text" placeholder="Rechercher une commande..." value={search} onChange={e => setSearch(e.target.value)}
-                  style={{ flex: 1, padding: '10px 16px', background: '#141414', border: '1px solid rgba(255,255,255,0.08)', color: 'white', fontSize: '14px', outline: 'none' }} />
+              <div style={{ fontSize: '18px', fontWeight: 'bold', color: 'white' }}>
+                {c.client_prenom} {c.client_nom || ''}
+                {c.client_entreprise && <span style={{ fontSize: '13px', color: '#FF5A00', marginLeft: '8px' }}>— {c.client_entreprise}</span>}
               </div>
-              <div style={{ background: '#141414', border: '1px solid rgba(255,90,0,0.08)', overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <thead><tr>{['Client', 'Produits', 'Total', 'Statut', 'Date', 'Action'].map(h => <th key={h} style={th}>{h}</th>)}</tr></thead>
-                  <tbody>
-                    {filteredCommandes.length === 0 ? (
-                      <tr><td colSpan={6} style={{ padding: '32px', textAlign: 'center', color: 'rgba(255,255,255,0.3)' }}>Aucune commande</td></tr>
-                    ) : filteredCommandes.map((c, i) => (
-                      <tr key={c.id} style={{ background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)' }}>
-                        <td style={td}><div style={{ fontWeight: 'bold' }}>{c.client_prenom}</div><div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>{c.client_email}</div></td>
-                        <td style={{ ...td, color: 'rgba(255,255,255,0.6)', fontSize: '12px' }}>{Array.isArray(c.produits) ? c.produits.map((p: any) => p.name).join(', ') : '-'}</td>
-                        <td style={{ ...td, color: '#FF5A00', fontWeight: 'bold', fontSize: '18px' }}>{Number(c.total).toFixed(2)} €</td>
-                        <td style={td}>
-                          <span style={{ fontSize: '11px', fontWeight: 'bold', padding: '4px 10px', background: c.statut === 'livree' ? 'rgba(0,200,100,0.15)' : c.statut === 'expediee' ? 'rgba(255,90,0,0.15)' : 'rgba(255,255,255,0.06)', color: c.statut === 'livree' ? '#00c864' : c.statut === 'expediee' ? '#FF5A00' : 'rgba(255,255,255,0.5)' }}>
-                            {c.statut === 'en_attente' ? 'En attente' : c.statut === 'expediee' ? 'Expédiée' : 'Livrée'}
-                          </span>
-                        </td>
-                        <td style={{ ...td, color: 'rgba(255,255,255,0.4)', fontSize: '12px' }}>{new Date(c.created_at).toLocaleDateString('fr-FR')}</td>
-                        <td style={td}>
-                          <select value={c.statut} onChange={e => updateStatut(c.id, e.target.value)}
-                            style={{ background: '#1E1E1E', border: '1px solid rgba(255,90,0,0.2)', color: 'white', padding: '4px 8px', fontSize: '12px', outline: 'none', cursor: 'pointer' }}>
-                            <option value="en_attente">En attente</option>
-                            <option value="expediee">Expédiée</option>
-                            <option value="livree">Livrée</option>
-                          </select>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', marginTop: '2px' }}>
+                {new Date(c.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
               </div>
             </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ fontSize: '22px', fontWeight: 'bold', color: '#FF5A00' }}>{Number(c.total).toFixed(2)} €</span>
+              <select value={c.statut} onChange={e => updateStatut(c.id, e.target.value)}
+                style={{ background: '#1E1E1E', border: '1px solid rgba(255,90,0,0.2)', color: 'white', padding: '6px 12px', fontSize: '12px', outline: 'none', cursor: 'pointer' }}>
+                <option value="en_attente">En attente</option>
+                <option value="expediee">Expédiée</option>
+                <option value="livree">Livrée</option>
+              </select>
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '16px' }}>
+            <div style={{ background: 'rgba(255,255,255,0.02)', padding: '14px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ fontSize: '10px', color: '#FF5A00', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '8px' }}>Client</div>
+              <div style={{ fontSize: '13px', color: 'white', marginBottom: '4px' }}>📧 {c.client_email}</div>
+              {c.client_telephone && <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', marginBottom: '4px' }}>📞 {c.client_telephone}</div>}
+              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>
+                {c.client_type === 'professionnel' ? '🏢 Professionnel' : '👤 Particulier'}
+              </div>
+            </div>
+            <div style={{ background: 'rgba(255,255,255,0.02)', padding: '14px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ fontSize: '10px', color: '#FF5A00', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '8px' }}>Adresse livraison</div>
+              <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.8)', lineHeight: '1.6' }}>📦 {c.client_adresse || '—'}</div>
+              {c.instructions_livraison && <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '8px' }}>💬 {c.instructions_livraison}</div>}
+            </div>
+            {c.client_adresse_facturation && (
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '14px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ fontSize: '10px', color: '#FF5A00', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '8px' }}>Adresse facturation</div>
+                <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.8)', lineHeight: '1.6' }}>🧾 {c.client_adresse_facturation}</div>
+              </div>
+            )}
+            <div style={{ background: 'rgba(255,255,255,0.02)', padding: '14px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ fontSize: '10px', color: '#FF5A00', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '8px' }}>Produits commandés</div>
+              {Array.isArray(c.produits) ? c.produits.map((p: any, i: number) => (
+                <div key={i} style={{ fontSize: '13px', color: 'rgba(255,255,255,0.8)', marginBottom: '4px' }}>
+                  🏷️ {p.name} × {p.quantity} — {Number(p.price).toFixed(2)} €
+                </div>
+              )) : <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)' }}>—</div>}
+            </div>
+          </div>
+          {c.stripe_session_id && (
+            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.2)', marginTop: '8px' }}>
+              Stripe ID : {c.stripe_session_id}
+            </div>
           )}
+        </div>
+      ))}
+    </div>
+  </div>
+)}
 
           {/* ═══ PRODUITS ═══ */}
           {tab === 'produits' && (
