@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
 import { useCart } from '@/context/CartContext'
+import { trackProductView, trackAddToCart } from '@/lib/tracker'
 
 type Product = {
   id: string
@@ -39,6 +40,10 @@ function ProductCard({ product }: { product: Product }) {
 
   const hasSizes = product.sizes && product.sizes.length > 0
 
+  useEffect(() => {
+    trackProductView(product.id, product.name)
+  }, [])
+
   const handleAdd = () => {
     if (hasSizes && !selectedSize) {
       setError(true)
@@ -53,6 +58,7 @@ function ProductCard({ product }: { product: Product }) {
       category: product.category,
       size: selectedSize,
     })
+    trackAddToCart(product.id, product.name, selectedSize)
     setAdded(true)
     setTimeout(() => setAdded(false), 1500)
   }

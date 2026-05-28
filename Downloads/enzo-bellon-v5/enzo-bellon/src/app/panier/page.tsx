@@ -8,6 +8,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
+import { trackCheckoutStart } from '@/lib/tracker'
 
 function PanierContent() {
   const { items, removeItem, updateQuantity, total, count, clearCart } = useCart()
@@ -17,6 +18,7 @@ function PanierContent() {
   const canceled = searchParams.get('canceled')
 
   const handleCheckout = async () => {
+    trackCheckoutStart()
     setLoading(true)
     try {
       const res = await fetch('/api/create-checkout', {
@@ -50,7 +52,6 @@ function PanierContent() {
           )}
         </div>
 
-        {/* Messages */}
         {success && (
           <div className="mb-8 p-5" style={{ background: 'rgba(0,200,100,0.1)', border: '1px solid rgba(0,200,100,0.3)' }}>
             <div className="font-bold text-lg mb-1" style={{ color: '#00c864' }}>✓ Commande confirmée !</div>
