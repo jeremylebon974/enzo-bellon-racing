@@ -22,18 +22,33 @@ export async function POST(req: NextRequest) {
       metadata: metadata || {},
     }])
 
-    // Upsert session
-    await supabase.from('sessions').upsert([{
-      id: session_id,
-      visitor_id,
-      started_at: new Date().toISOString(),
-      ended_at: new Date().toISOString(),
-      pages_viewed: type === 'page_view' ? 1 : 0,
-      scroll_depth: metadata?.depth || 0,
-      converted: type === 'purchase',
-    }], { onConflict: 'id', ignoreDuplicates: false })
+    // Gestion session
+    const { data: existing } = await supabase
+      .from('sessions')
+      .select('*')
+      .eq('id', session_id)
+      .maybeSingle()
 
-    // Calcule et met à jour le score d'intention
+    if (existing) {
+      await supabase.from('sessions').update({
+        ended_at: new Date().toISOString(),
+        pages_viewed: type === 'page_view' ? (existing.pages_viewed || 0) + 1 : (existing.pages_viewed || 0),
+        scroll_depth: metadata?.depth ? Math.max(existing.scroll_depth || 0, metadata.depth) : (existing.scroll_depth || 0),
+        converted: type === 'purchase' ? true : (existing.converted || false),
+      }).eq('id', session_id)
+    } else {
+      await supabase.from('sessions').insert([{
+        id: session_id,
+        visitor_id,
+        started_at: new Date().toISOString(),
+        ended_at: new Date().toISOString(),
+        pages_viewed: type === 'page_view' ? 1 : 0,
+        scroll_depth: metadata?.depth || 0,
+        converted: type === 'purchase',
+      }])
+    }
+
+    // Score intention d'achat
     const { data: events } = await supabase
       .from('events')
       .select('type')
