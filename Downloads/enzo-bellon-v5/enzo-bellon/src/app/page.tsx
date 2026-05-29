@@ -3,7 +3,6 @@ export const dynamic = 'force-dynamic'
 import Navbar from '@/components/Navbar'
 import Hero from '@/components/Hero'
 import BoutiqueSection from '@/components/BoutiqueSection'
-import GalerieSection from '@/components/GalerieSection'
 import SaisonSection from '@/components/SaisonSection'
 import PartenairesSection from '@/components/PartenairesSection'
 import Footer from '@/components/Footer'
@@ -17,7 +16,6 @@ export default function Home() {
       <PageTracker />
       <Hero />
       <BoutiqueSection />
-      <GalerieSection />
       <SaisonSection />
       <PartenairesSection />
       <Footer />
