@@ -150,10 +150,8 @@ export default function AdminDashboard() {
 
   const navItems: { id: Tab; icon: string; label: string; sublabel: string; badge?: number }[] = [
     { id: 'overview', icon: '📊', label: 'Vue d\'ensemble', sublabel: 'KPI & statistiques' },
-    { id: 'clients', icon: '👥', label: 'Clients', sublabel: 'Newsletter & inscrits', badge: clients.length },
-    { id: 'commandes', icon: '🛒', label: 'Commandes', sublabel: 'Suivi & expéditions', badge: commandes.filter(c => c.statut === 'en_attente').length },
-    { id: 'produits', icon: '🏷️', label: 'Produits', sublabel: 'Boutique & catalogue', badge: produits.filter(p => p.active).length },
-    { id: 'social', icon: '📱', label: 'Réseaux Sociaux', sublabel: 'Instagram & Facebook' },
+    { id: 'clients', icon: '👥', label: 'Clients', sublabel: 'Newsletter & inscrits' },    { id: 'commandes', icon: '🛒', label: 'Commandes', sublabel: 'Suivi & expéditions', badge: commandes.filter(c => c.statut === 'en_attente').length },
+    { id: 'produits', icon: '🏷️', label: 'Produits', sublabel: 'Boutique & catalogue' },    { id: 'social', icon: '📱', label: 'Réseaux Sociaux', sublabel: 'Instagram & Facebook' },
     { id: 'comportement', icon: '🧠', label: 'Comportement', sublabel: 'Sessions & parcours' },
     { id: 'opportunites', icon: '💡', label: 'Opportunités', sublabel: 'Détection automatique' },
     { id: 'intention', icon: '🎯', label: 'Intention d\'achat', sublabel: 'Score visiteurs' },
