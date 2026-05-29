@@ -1,210 +1,123 @@
 'use client'
 import Image from 'next/image'
-import { season2025 } from '@/data/data'
+import { useState } from 'react'
+
+const rounds = [
+  { num: 1, name: 'Barcelona', circuit: 'Circuit de Barcelona-Catalunya', country: 'ES', date: '24 Mai 2026', status: 'termine', img: 'https://res.cloudinary.com/drcipztzo/image/upload/v1780045010/round_1_xzpb2m.jpg' },
+  { num: 2, name: 'Estoril', circuit: 'Circuito do Estoril', country: 'PT', date: '14 Juin 2026', status: 'a_venir', img: 'https://res.cloudinary.com/drcipztzo/image/upload/v1780045015/round_2_cuythp.jpg' },
+  { num: 3, name: 'Jerez', circuit: 'Circuito de Jerez – Angel Nieto', country: 'ES', date: '5 Juillet 2026', status: 'a_venir', img: 'https://res.cloudinary.com/drcipztzo/image/upload/v1780045026/round_3_ecpmoz.jpg' },
+  { num: 4, name: 'Magny-Cours', circuit: 'Circuit de Nevers Magny-Cours', country: 'FR', date: '26 Juillet 2026', status: 'a_venir', img: 'https://res.cloudinary.com/drcipztzo/image/upload/v1780045049/Round_4_glnmbt.jpg' },
+  { num: 5, name: 'Ricardo Tormo', circuit: 'Circuit Ricardo Tormo', country: 'ES', date: '6 Septembre 2026', status: 'a_venir', img: 'https://res.cloudinary.com/drcipztzo/image/upload/v1780045044/round_5_hsankv.jpg' },
+  { num: 6, name: 'Aragon', circuit: 'Motorland Aragon', country: 'ES', date: '27 Septembre 2026', status: 'a_venir', img: 'https://res.cloudinary.com/drcipztzo/image/upload/v1780045036/round_6_fxtwhl.jpg' },
+  { num: 7, name: 'Misano', circuit: 'Motor Valley – Misano', country: 'IT', date: '18 Octobre 2026', status: 'a_venir', img: 'https://res.cloudinary.com/drcipztzo/image/upload/v1780045018/round_7_tnbilo.jpg' },
+]
 
 export default function SaisonSection() {
-  const totalPoints = season2025
-    .filter((r) => r.points !== null)
-    .reduce((sum, r) => sum + (r.points || 0), 0)
+  const [selected, setSelected] = useState<number | null>(null)
+  const termine = rounds.filter(r => r.status === 'termine').length
 
   return (
-    <section
-      id="saison"
-      className="relative py-32 overflow-hidden"
-      style={{ background: 'var(--carbon)' }}
-    >
-      {/* Background grid lines */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage: 'linear-gradient(rgba(255,90,0,0.03) 1px, transparent 1px)',
-          backgroundSize: '100% 80px',
-        }}
-      />
+    <section id="saison" style={{ background: 'var(--black)', borderTop: '1px solid rgba(255,90,0,0.08)' }}>
+      <div className="py-24">
+        <div className="max-w-7xl mx-auto px-6">
 
-      <div className="max-w-7xl mx-auto px-6">
-        {/* Header */}
-        <div className="flex flex-col lg:flex-row items-start lg:items-end justify-between gap-8 mb-16">
-          <div>
-            <span className="section-tag mb-3 block">Compétition</span>
-            <h2
-              className="font-display"
-              style={{ fontSize: 'clamp(48px, 7vw, 80px)', lineHeight: 0.9 }}
-            >
-              <span className="text-white">SAISON</span>
-              <br />
-              <span style={{ color: 'var(--orange)' }}>FIM 2026</span>
-            </h2>
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12">
+            <div>
+              <div className="font-bold text-xs tracking-widest uppercase mb-3"
+                style={{ fontFamily: 'var(--font-condensed)', color: 'var(--orange)', letterSpacing: '0.25em' }}>
+                Compétition
+              </div>
+              <h2 className="font-display leading-none" style={{ fontSize: 'clamp(40px,6vw,72px)' }}>
+                <span className="text-white">SAISON </span>
+                <span style={{ color: 'var(--orange)' }}>FIM 2026</span>
+              </h2>
+            </div>
+            <div className="flex gap-6">
+              {[
+                { label: 'Points', value: '0' },
+                { label: 'Rounds disputés', value: `${termine}` },
+                { label: 'Rounds total', value: '7' },
+              ].map(s => (
+                <div key={s.label} className="text-center px-5 py-3"
+                  style={{ border: '1px solid rgba(255,90,0,0.2)', background: 'rgba(255,90,0,0.04)' }}>
+                  <div className="font-display text-2xl" style={{ color: 'var(--orange)' }}>{s.value}</div>
+                  <div className="text-xs uppercase tracking-wider mt-1"
+                    style={{ fontFamily: 'var(--font-condensed)', color: 'rgba(245,245,245,0.4)', letterSpacing: '0.1em' }}>
+                    {s.label}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Season summary */}
-          <div className="flex gap-6">
-            {[
-              { value: totalPoints.toString(), label: 'Points' },
-              { value: season2025.filter(r => r.status === 'completed').length.toString(), label: 'Rounds disputés' },
-              { value: season2025.length.toString(), label: 'Rounds total' },
-            ].map((stat) => (
-              <div
-                key={stat.label}
-                className="text-center px-6 py-4"
+          {/* Grid rounds */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {rounds.map(r => (
+              <div key={r.num}
+                className="relative overflow-hidden cursor-pointer group"
                 style={{
-                  background: 'rgba(255,90,0,0.05)',
-                  border: '1px solid rgba(255,90,0,0.1)',
+                  aspectRatio: '4/5',
+                  border: selected === r.num ? '2px solid var(--orange)' : '1px solid rgba(255,90,0,0.1)',
+                  transition: 'all 0.3s ease',
                 }}
+                onClick={() => setSelected(selected === r.num ? null : r.num)}
+                onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(255,90,0,0.5)'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = selected === r.num ? 'var(--orange)' : 'rgba(255,90,0,0.1)'}
               >
-                <div
-                  className="font-display text-3xl"
-                  style={{ color: 'var(--orange)' }}
-                >
-                  {stat.value}
+                {/* Image */}
+                <Image
+                  src={r.img}
+                  alt={r.name}
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+
+                {/* Overlay */}
+                <div className="absolute inset-0"
+                  style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 50%, transparent 100%)' }} />
+
+                {/* Top badges */}
+                <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
+                  <span className="font-display text-xs px-2 py-1"
+                    style={{ background: 'rgba(0,0,0,0.7)', color: 'var(--orange)', border: '1px solid rgba(255,90,0,0.3)' }}>
+                    R{r.num}
+                  </span>
+                  <span className="font-bold text-xs px-2 py-1"
+                    style={{ background: 'rgba(0,0,0,0.7)', color: 'white', fontFamily: 'var(--font-condensed)', letterSpacing: '0.1em' }}>
+                    {r.country}
+                  </span>
                 </div>
-                <div
-                  className="font-condensed text-xs tracking-widest uppercase mt-1"
-                  style={{ color: 'rgba(245,245,245,0.4)', letterSpacing: '0.15em' }}
-                >
-                  {stat.label}
+
+                {/* Status badge */}
+                <div className="absolute top-3 left-1/2 -translate-x-1/2">
+                  <span className="font-bold text-xs px-3 py-1"
+                    style={{
+                      fontFamily: 'var(--font-condensed)',
+                      letterSpacing: '0.1em',
+                      background: r.status === 'termine' ? 'rgba(0,200,100,0.2)' : 'rgba(255,255,255,0.1)',
+                      color: r.status === 'termine' ? '#00c864' : 'rgba(255,255,255,0.6)',
+                      border: `1px solid ${r.status === 'termine' ? 'rgba(0,200,100,0.4)' : 'rgba(255,255,255,0.15)'}`,
+                    }}>
+                    {r.status === 'termine' ? 'TERMINÉ' : 'À VENIR'}
+                  </span>
+                </div>
+
+                {/* Bottom info */}
+                <div className="absolute bottom-0 left-0 right-0 p-4">
+                  <div className="font-display text-lg leading-tight text-white mb-1">{r.name.toUpperCase()}</div>
+                  <div className="text-xs mb-2"
+                    style={{ color: 'rgba(245,245,245,0.5)', fontFamily: 'var(--font-condensed)' }}>
+                    {r.date}
+                  </div>
+                  <div className="text-xs" style={{ color: 'rgba(245,245,245,0.3)', fontFamily: 'var(--font-condensed)' }}>
+                    {r.status === 'termine' ? 'Résultat à venir' : 'Résultat à venir'}
+                  </div>
                 </div>
               </div>
             ))}
           </div>
-        </div>
 
-        {/* Race cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {season2025.map((round) => (
-            <div
-              key={round.round}
-              className="relative overflow-hidden flex flex-col"
-              style={{
-                background: 'var(--dark)',
-                border: round.status === 'completed'
-                  ? '1px solid rgba(255,90,0,0.15)'
-                  : '1px solid rgba(255,255,255,0.05)',
-              }}
-            >
-              {/* Round number accent */}
-              <div
-                className="absolute top-0 left-0 w-full h-1"
-                style={{
-                  background: round.status === 'completed'
-                    ? 'linear-gradient(90deg, #FF3300, #FF5A00)'
-                    : 'rgba(255,255,255,0.05)',
-                }}
-              />
-
-              {/* Image or placeholder */}
-              <div
-                className="relative overflow-hidden"
-                style={{ height: '120px', background: 'rgba(255,255,255,0.02)' }}
-              >
-                {round.image ? (
-                  <Image
-                    src={round.image}
-                    alt={`Round ${round.round}`}
-                    fill
-                    className="object-cover opacity-70"
-                  />
-                ) : (
-                  <div
-                    className="w-full h-full flex items-center justify-center"
-                    style={{ background: 'var(--gray)' }}
-                  >
-                    <span
-                      className="font-display text-4xl"
-                      style={{ color: 'rgba(255,90,0,0.1)' }}
-                    >
-                      R{round.round}
-                    </span>
-                  </div>
-                )}
-                {round.image && (
-                  <div
-                    className="absolute inset-0"
-                    style={{ background: 'linear-gradient(to top, rgba(10,10,10,0.6) 0%, transparent 60%)' }}
-                  />
-                )}
-
-                {/* Flag */}
-                <div className="absolute top-3 right-3 text-xl">{round.flag}</div>
-              </div>
-
-              {/* Content */}
-              <div className="p-5 flex-1 flex flex-col">
-                <div className="flex items-center justify-between mb-3">
-                  <span
-                    className="font-condensed text-xs tracking-widest uppercase"
-                    style={{ color: 'rgba(245,245,245,0.4)', letterSpacing: '0.2em' }}
-                  >
-                    ROUND {round.round}
-                  </span>
-                  <span
-                    className="font-condensed text-xs tracking-widest uppercase px-2 py-1"
-                    style={{
-                      background: round.status === 'completed'
-                        ? 'rgba(255,90,0,0.1)'
-                        : 'rgba(255,255,255,0.04)',
-                      color: round.status === 'completed'
-                        ? 'var(--orange)'
-                        : 'rgba(245,245,245,0.3)',
-                      border: round.status === 'completed'
-                        ? '1px solid rgba(255,90,0,0.2)'
-                        : '1px solid rgba(255,255,255,0.05)',
-                      letterSpacing: '0.1em',
-                    }}
-                  >
-                    {round.status === 'completed' ? 'Terminé' : 'À venir'}
-                  </span>
-                </div>
-
-                <h3
-                  className="font-condensed font-700 text-sm leading-tight mb-1"
-                  style={{ color: 'var(--white)', fontFamily: 'var(--font-condensed)' }}
-                >
-                  {round.circuit}
-                </h3>
-                <div
-                  className="text-xs mb-4"
-                  style={{ color: 'rgba(245,245,245,0.4)' }}
-                >
-                  {round.country} — {round.date}
-                </div>
-
-                {/* Result */}
-                <div className="mt-auto">
-                  {round.result ? (
-                    <div className="flex items-center justify-between">
-                      <div
-                        className="font-display text-3xl"
-                        style={{ color: 'var(--orange)' }}
-                      >
-                        {round.result}
-                      </div>
-                      <div className="text-right">
-                        <div
-                          className="font-display text-xl text-white"
-                        >
-                          +{round.points} pts
-                        </div>
-                        <div
-                          className="font-condensed text-xs"
-                          style={{ color: 'rgba(245,245,245,0.3)' }}
-                        >
-                          Points marqués
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div
-                      className="font-condensed text-xs tracking-widest uppercase"
-                      style={{ color: 'rgba(245,245,245,0.25)' }}
-                    >
-                      Résultat à venir
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
         </div>
       </div>
     </section>
