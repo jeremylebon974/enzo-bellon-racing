@@ -22,31 +22,16 @@ export async function POST(req: NextRequest) {
       metadata: metadata || {},
     }])
 
-    // Met à jour ou crée la session
-    const { data: existingSession } = await supabase
-      .from('sessions')
-      .select('*')
-      .eq('id', session_id)
-      .single()
-
-    if (existingSession) {
-      await supabase.from('sessions').update({
-        ended_at: new Date().toISOString(),
-        pages_viewed: type === 'page_view' ? existingSession.pages_viewed + 1 : existingSession.pages_viewed,
-        scroll_depth: metadata?.depth ? Math.max(existingSession.scroll_depth, metadata.depth) : existingSession.scroll_depth,
-        converted: type === 'purchase' ? true : existingSession.converted,
-      }).eq('id', session_id)
-    } else {
-      await supabase.from('sessions').insert([{
-        id: session_id,
-        visitor_id,
-        started_at: new Date().toISOString(),
-        ended_at: new Date().toISOString(),
-        pages_viewed: type === 'page_view' ? 1 : 0,
-        scroll_depth: metadata?.depth || 0,
-        converted: false,
-      }])
-    }
+    // Upsert session
+    await supabase.from('sessions').upsert([{
+      id: session_id,
+      visitor_id,
+      started_at: new Date().toISOString(),
+      ended_at: new Date().toISOString(),
+      pages_viewed: type === 'page_view' ? 1 : 0,
+      scroll_depth: metadata?.depth || 0,
+      converted: type === 'purchase',
+    }], { onConflict: 'id', ignoreDuplicates: false })
 
     // Calcule et met à jour le score d'intention
     const { data: events } = await supabase
