@@ -94,6 +94,7 @@ export default function AdminDashboard() {
 
   const deleteProduit = async (id: string) => {
     if (!confirm('Supprimer ce produit ?')) return
+    await supabase.from('events').delete().eq('product_id', id)
     await supabase.from('produits').delete().eq('id', id)
     await loadData()
   }
