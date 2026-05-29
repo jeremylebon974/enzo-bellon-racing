@@ -656,8 +656,8 @@ export default function AdminDashboard() {
                     { label: 'Checkout', type: 'checkout_start', color: '#FF5A00' },
                     { label: 'Achats', type: 'purchase', color: '#00c864' },
                   ].map((step, i, arr) => {
-                    const count = [...new Set(events.filter(e => e.type === step.type).map(e => e.visitor_id))].length
-                    const maxCount = [...new Set(events.filter(e => e.type === arr[0].type).map(e => e.visitor_id))].length || 1
+                    const count = events.filter(e => e.type === step.type).reduce((acc: string[], e) => acc.includes(e.visitor_id) ? acc : [...acc, e.visitor_id], []).length
+                    const maxCount = events.filter(e => e.type === arr[0].type).reduce((acc: string[], e) => acc.includes(e.visitor_id) ? acc : [...acc, e.visitor_id], []).length || 1
                     const barWidth = Math.round((count / maxCount) * 100)
                     return (
                       <div key={step.type} style={{ marginBottom: '12px' }}>
@@ -680,9 +680,9 @@ export default function AdminDashboard() {
           {tab === 'opportunites' && (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
               {(() => {
-                const viewedIds = [...new Set(events.filter(e => e.type === 'product_view').map(e => e.product_id))]
+                const viewedIds = events.filter(e => e.type === 'product_view').reduce((acc: string[], e) => acc.includes(e.product_id) ? acc : [...acc, e.product_id], [])
                 const purchasedNames = commandes.flatMap(c => Array.isArray(c.produits) ? c.produits.map((p: any) => p.name) : [])
-                const opps = viewedIds.map(id => {
+                const opps = viewedIds.map((id: any) => {
                   const prod = produits.find(p => p.id === id); if (!prod) return null
                   const views = events.filter(e => e.type === 'product_view' && e.product_id === id).length
                   const purchased = purchasedNames.filter(n => n === prod.name).length
@@ -705,9 +705,9 @@ export default function AdminDashboard() {
                 )
               })()}
               {(() => {
-                const cartV = [...new Set(events.filter(e => e.type === 'add_to_cart').map(e => e.visitor_id))]
-                const checkV = [...new Set(events.filter(e => e.type === 'checkout_start').map(e => e.visitor_id))]
-                const abandoned = cartV.filter(v => !checkV.includes(v)).length
+                const cartV = events.filter(e => e.type === 'add_to_cart').reduce((acc: string[], e) => acc.includes(e.visitor_id) ? acc : [...acc, e.visitor_id], [])
+                const checkV = events.filter(e => e.type === 'checkout_start').reduce((acc: string[], e) => acc.includes(e.visitor_id) ? acc : [...acc, e.visitor_id], [])
+                const abandoned = cartV.filter((v: string) => !checkV.includes(v)).length
                 return abandoned > 0 ? (
                   <div style={{ background: '#141414', border: '1px solid rgba(255,50,50,0.2)', padding: '20px', position: 'relative' }}>
                     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: 'linear-gradient(90deg,#ff5050,#FF5A00)' }} />
@@ -719,7 +719,7 @@ export default function AdminDashboard() {
                 ) : null
               })()}
               {(() => {
-                const hot = visitorScores.filter(v => v.level === 'chaud' || v.level === 'acheteur')
+                const hot = visitorScores.filter((v: any) => v.level === 'chaud' || v.level === 'acheteur')
                 return hot.length > 0 ? (
                   <div style={{ background: '#141414', border: '1px solid rgba(0,200,100,0.2)', padding: '20px', position: 'relative' }}>
                     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: 'linear-gradient(90deg,#00c864,#1877f2)' }} />
